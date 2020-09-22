@@ -51,5 +51,11 @@ func InitRouter() *gin.Engine {
 		onedrive.GET("/getpath", middleware.CheckFolderPass(), api.CacheGetPath)
 	}
 
+	admin := r.Group("/admin")
+	admin.Use(middleware.CheckLogin())
+	{
+		admin.GET("/refresh", middleware.AdminManualRefresh())
+	}
+
 	return r
 }

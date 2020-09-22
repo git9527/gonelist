@@ -8,6 +8,13 @@ import (
 	"net/http"
 )
 
+func AdminManualRefresh() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		onedrive.RefreshOnedriveAll()
+		app.Response(c, http.StatusOK, e.SUCCESS, "Done")
+	}
+}
+
 // 判断 onedrive 是否 login
 func CheckLogin() gin.HandlerFunc {
 	return func(c *gin.Context) {
