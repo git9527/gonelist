@@ -69,6 +69,8 @@ type UserSetting struct {
 	Server *Server `json:"server"`
 	// 目录密码
 	PassList []*Pass `json:"pass_list"`
+	// 根据域名匹配子文件夹
+	DomainBasedSubFolders *DomainBasedSubFolders `json:"domain_based_sub_folders"`
 }
 
 var UserSet = &UserSetting{}
@@ -115,6 +117,10 @@ func LoadUserConfig(configPath string) error {
 			UserSet.TokenPath = path.Join(UserSet.TokenPath, ".token")
 		}
 	}
+
+	if UserSet.DomainBasedSubFolders == nil {
+		UserSet.DomainBasedSubFolders = defaultDomainBasedSubFolders
+	}
 	log.Info("成功导入用户配置")
 	return nil
 }
@@ -151,4 +157,19 @@ var defaultPassListSetting = []*Pass{
 		Path: "",
 		Pass: "",
 	},
+}
+
+type DomainBasedSubFolders struct {
+	Enable        bool    `json:"enable"`
+	Pairs         []*Pair `json:"pairs"`
+	DefaultFolder string  `json:"default_folder"`
+}
+
+var defaultDomainBasedSubFolders = &DomainBasedSubFolders{
+	Enable: false,
+}
+
+type Pair struct {
+	Domain    string `json:"domain"`
+	SubFolder string `json:"sub_folder"`
 }

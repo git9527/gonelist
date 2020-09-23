@@ -8,10 +8,11 @@ import (
 
 func TestLoadUserConfig(t *testing.T) {
 	filePath := "../config.json"
-	LoadUserConfig(filePath)
+	_ = LoadUserConfig(filePath)
 	fmt.Println(UserSet)
 	fmt.Println(*UserSet.Server)
 	fmt.Println(UserSet.PassList[0])
+	assert.Equal(t, UserSet.DomainBasedSubFolders.Pairs[1].Domain, "127.0.0.1:8000")
 }
 
 func TestGetBindAddr(t *testing.T) {
