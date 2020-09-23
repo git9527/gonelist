@@ -21,12 +21,12 @@
   "domain_based_sub_folders": {
     "enable": true,
     "pairs": [{
-      "domain": "localhost:8000",
+      "domain": "localhost:8080",
       "sub_folder": "/zhangsn",
       "html_title": "Site hosted in localhost",
       "site_header": "Header in localhost"
     }, {
-      "domain": "127.0.0.1:8000",
+      "domain": "127.0.0.1:8080",
       "sub_folder": "/local",
       "html_title": "Site hosted in 127.0.0.1",
       "site_header": "Header in 127.0.0.1"

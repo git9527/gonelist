@@ -45,7 +45,7 @@ func RefreshOnedriveAll() error {
 }
 
 // 从缓存获取某个路径下的所有内容
-func CacheGetPathList(oPath string, host string) (*FileNode, error) {
+func CacheGetPathList(oPath string, origin string) (*FileNode, error) {
 	var (
 		root    *FileNode
 		isFound bool
@@ -56,19 +56,19 @@ func CacheGetPathList(oPath string, host string) (*FileNode, error) {
 
 	if oPath == "" || oPath == "/" || len(pArray) < 2 {
 		if conf.UserSet.DomainBasedSubFolders.Enable {
-			hostSubNode, error := GetHostSpecifiedNode(root, host)
+			hostSubNode, error := GetHostSpecifiedNode(root, origin)
 			if hostSubNode != nil {
-				return ConvertReturnNode(hostSubNode, host), nil
+				return ConvertReturnNode(hostSubNode, origin), nil
 			} else {
 				return nil, error
 			}
 		}
-		return ConvertReturnNode(root, host), nil
+		return ConvertReturnNode(root, origin), nil
 	}
 
 	hostSubNode := root
 	if conf.UserSet.DomainBasedSubFolders.Enable {
-		subNode, error := GetHostSpecifiedNode(root, host)
+		subNode, error := GetHostSpecifiedNode(root, origin)
 		if hostSubNode == nil {
 			return nil, error
 		} else {
@@ -94,7 +94,7 @@ func CacheGetPathList(oPath string, host string) (*FileNode, error) {
 	}
 
 	// 只返回当前层的内容
-	reNode := ConvertReturnNode(hostSubNode, host)
+	reNode := ConvertReturnNode(hostSubNode, origin)
 	return reNode, nil
 }
 
@@ -132,11 +132,11 @@ func ConvertReturnNode(node *FileNode, host string) *FileNode {
 	return reNode
 }
 
-func CopyFileNode(node *FileNode, host string) *FileNode {
+func CopyFileNode(node *FileNode, origin string) *FileNode {
 	if node == nil {
 		return nil
 	}
-	path := GetReplacePath(node.Path, host)
+	path := GetReplacePath(node.Path, origin)
 	return &FileNode{
 		Name:           node.Name,
 		Path:           path,
@@ -173,10 +173,10 @@ func GetDownloadUrl(filePath string, host string) (string, error) {
 // 替换路径
 // 如果设置了 folderSub 为 /public
 // 那么 /public 替换为 /, /public/test 替换为 /test
-func GetReplacePath(pSrc string, host string) string {
+func GetReplacePath(pSrc string, origin string) string {
 	if conf.UserSet.DomainBasedSubFolders.Enable {
 		for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
-			if pair.Domain == host {
+			if pair.Domain == origin {
 				return ReplaceLeadingPath(pSrc, pair.SubFolder)
 			}
 		}

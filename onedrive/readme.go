@@ -45,8 +45,7 @@ func GetAllREADMEAndPass(current *FileNode) error {
 			}).Infof("download readme file to cache error")
 		} else {
 			if conf.UserSet.DomainBasedSubFolders.Enable {
-				for i := range conf.UserSet.DomainBasedSubFolders.Pairs {
-					pair := conf.UserSet.DomainBasedSubFolders.Pairs[i]
+				for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
 					p := GetReplacePath(current.Path, pair.Domain)
 					SaveIntoCache(p, readmeBytes)
 				}

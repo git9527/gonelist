@@ -7,6 +7,7 @@ import (
 	"gonelist/onedrive"
 	"gonelist/pkg/app"
 	"gonelist/pkg/e"
+	"gonelist/pkg/util"
 	"net/http"
 	"strings"
 )
@@ -29,10 +30,10 @@ func MGGetFileTree(c *gin.Context) {
 
 // 获取对应路径的文件
 func CacheGetPath(c *gin.Context) {
-	host := c.Request.Host
+	origin := util.GetOriginHost(c)
 	oPath := c.Query("path")
 
-	root, err := onedrive.CacheGetPathList(oPath, host)
+	root, err := onedrive.CacheGetPathList(oPath, origin)
 	if err != nil {
 		app.Response(c, http.StatusOK, e.ITEM_NOT_FOUND, nil)
 	} else if root == nil {
@@ -45,7 +46,7 @@ func CacheGetPath(c *gin.Context) {
 // 分享文件下载链接
 func Download(c *gin.Context) {
 	filePath := c.Param("path")
-	host := c.Request.Host
+	origin := util.GetOriginHost(c)
 	// 屏蔽 .password 文件的下载
 	list := strings.Split(filePath, "/")
 	if list[len(list)-1] == ".password" {
@@ -53,7 +54,7 @@ func Download(c *gin.Context) {
 		c.Abort()
 	}
 
-	downloadURL, err := onedrive.GetDownloadUrl(filePath, host)
+	downloadURL, err := onedrive.GetDownloadUrl(filePath, origin)
 	if err != nil {
 		app.Response(c, http.StatusOK, e.ITEM_NOT_FOUND, nil)
 	} else {

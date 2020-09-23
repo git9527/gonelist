@@ -2,10 +2,12 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"gonelist/conf"
 	"gonelist/onedrive"
 	"gonelist/pkg/app"
 	"gonelist/pkg/e"
+	"gonelist/pkg/util"
 	"net/http"
 )
 
@@ -18,9 +20,10 @@ func AdminManualRefresh() gin.HandlerFunc {
 
 func GetSiteInfo() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		host := c.Request.Host
+		origin := util.GetOriginHost(c)
+		log.Info("Getting site info for origin: ", origin)
 		for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
-			if pair.Domain == host {
+			if pair.Domain == origin {
 				type SiteInfo struct {
 					HtmlTitle  string
 					SiteHeader string
@@ -66,7 +69,7 @@ func CheckOnedriveInit() gin.HandlerFunc {
 func CheckFolderPass() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		p := c.Query("path")
-		host := c.Request.Host
+		origin := util.GetOriginHost(c)
 		pass := c.GetHeader("pass")
 		// 判断 config.json 中的密码
 		if !onedrive.CheckPassCorrect(p, pass) {
@@ -75,7 +78,7 @@ func CheckFolderPass() gin.HandlerFunc {
 			c.Abort()
 		}
 		// 判断路径下是否有 .password 文件
-		if root, err := onedrive.CacheGetPathList(p, host); root != nil && err == nil {
+		if root, err := onedrive.CacheGetPathList(p, origin); root != nil && err == nil {
 			if root.Password != "" && pass != root.Password {
 				app.Response(c, http.StatusOK, e.PASS_ERROR, nil)
 				c.Abort()
