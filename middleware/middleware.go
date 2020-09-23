@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"gonelist/conf"
 	"gonelist/onedrive"
 	"gonelist/pkg/app"
 	"gonelist/pkg/e"
@@ -12,6 +13,27 @@ func AdminManualRefresh() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		onedrive.RefreshOnedriveAll()
 		app.Response(c, http.StatusOK, e.SUCCESS, "Done")
+	}
+}
+
+func GetSiteInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		host := c.Request.Host
+		for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
+			if pair.Domain == host {
+				type SiteInfo struct {
+					HtmlTitle  string
+					SiteHeader string
+				}
+				info := SiteInfo{
+					SiteHeader: pair.SiteHeader,
+					HtmlTitle:  pair.HtmlTitle,
+				}
+				app.Response(c, http.StatusOK, e.SUCCESS, info)
+				return
+			}
+		}
+		app.Response(c, http.StatusOK, e.ITEM_NOT_FOUND, "")
 	}
 }
 

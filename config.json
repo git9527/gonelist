@@ -22,10 +22,14 @@
     "enable": true,
     "pairs": [{
       "domain": "localhost:8000",
-      "sub_folder": "/zhangsn"
+      "sub_folder": "/zhangsn",
+      "html_title": "Site hosted in localhost",
+      "site_header": "Header in localhost"
     }, {
       "domain": "127.0.0.1:8000",
-      "sub_folder": "/local"
+      "sub_folder": "/local",
+      "html_title": "Site hosted in 127.0.0.1",
+      "site_header": "Header in 127.0.0.1"
     }],
     "default_folder": "/some folder not exist"
   },

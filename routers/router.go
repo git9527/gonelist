@@ -16,7 +16,8 @@ func InitRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(cors.New(cors.Options{
-		AllowedHeaders: []string{"pass"}, // 允许 header
+		AllowedHeaders: []string{"pass"}, // 允许 header,
+		AllowedOrigins: []string{"*"},
 	}))
 
 	r.Use(static.Serve("/", static.LocalFile(conf.GetDistPATH(), false)))
@@ -55,6 +56,12 @@ func InitRouter() *gin.Engine {
 	admin.Use(middleware.CheckLogin())
 	{
 		admin.GET("/refresh", middleware.AdminManualRefresh())
+	}
+
+	info := r.Group("/info")
+	info.Use(middleware.CheckLogin())
+	{
+		info.GET("/site", middleware.GetSiteInfo())
 	}
 
 	return r

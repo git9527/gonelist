@@ -175,8 +175,7 @@ func GetDownloadUrl(filePath string, host string) (string, error) {
 // 那么 /public 替换为 /, /public/test 替换为 /test
 func GetReplacePath(pSrc string, host string) string {
 	if conf.UserSet.DomainBasedSubFolders.Enable {
-		for i := range conf.UserSet.DomainBasedSubFolders.Pairs {
-			pair := conf.UserSet.DomainBasedSubFolders.Pairs[i]
+		for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
 			if pair.Domain == host {
 				return ReplaceLeadingPath(pSrc, pair.SubFolder)
 			}
