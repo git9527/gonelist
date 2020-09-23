@@ -4,6 +4,7 @@ import (
 	"fmt"
 	gocache "github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+	"gonelist/conf"
 	"gonelist/pkg/markdown"
 	"strings"
 	"time"
@@ -43,10 +44,17 @@ func GetAllREADMEAndPass(current *FileNode) error {
 				"url":  current.READMEUrl,
 			}).Infof("download readme file to cache error")
 		} else {
-			p := GetReplacePath(current.Path)
-			// 转化成 HTML 的结果
-			finalBytes := markdown.MarkdownToHTMLByBytes(readmeBytes)
-			reCache.Set(READEME+p, finalBytes, DefaultTime)
+			if conf.UserSet.DomainBasedSubFolders.Enable {
+				for i := range conf.UserSet.DomainBasedSubFolders.Pairs {
+					pair := conf.UserSet.DomainBasedSubFolders.Pairs[i]
+					p := GetReplacePath(current.Path, pair.Domain)
+					SaveIntoCache(p, readmeBytes)
+				}
+			} else {
+				p := GetReplacePath(current.Path, "")
+				SaveIntoCache(p, readmeBytes)
+			}
+
 		}
 	}
 
@@ -68,6 +76,12 @@ func GetAllREADMEAndPass(current *FileNode) error {
 		}
 	}
 	return nil
+}
+
+func SaveIntoCache(p string, readmeBytes []byte) {
+	// 转化成 HTML 的结果
+	finalBytes := markdown.MarkdownToHTMLByBytes(readmeBytes)
+	reCache.Set(READEME+p, finalBytes, DefaultTime)
 }
 
 func GetREADMEInCache(p string) ([]byte, error) {

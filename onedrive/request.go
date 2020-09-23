@@ -46,7 +46,7 @@ func GetAllFiles() (*FileNode, error) {
 		Children:       nil,
 	}
 
-	if conf.UserSet.Server.FolderSub == "/" {
+	if conf.UserSet.Server.FolderSub == "/" || conf.UserSet.DomainBasedSubFolders.Enable {
 		prefix = ""
 	} else {
 		prefix = conf.UserSet.Server.FolderSub

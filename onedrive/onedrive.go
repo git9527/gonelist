@@ -45,7 +45,7 @@ func RefreshOnedriveAll() error {
 }
 
 // 从缓存获取某个路径下的所有内容
-func CacheGetPathList(oPath string) (*FileNode, error) {
+func CacheGetPathList(oPath string, host string) (*FileNode, error) {
 	var (
 		root    *FileNode
 		isFound bool
@@ -55,14 +55,31 @@ func CacheGetPathList(oPath string) (*FileNode, error) {
 	pArray := strings.Split(oPath, "/")
 
 	if oPath == "" || oPath == "/" || len(pArray) < 2 {
-		return ConvertReturnNode(root), nil
+		if conf.UserSet.DomainBasedSubFolders.Enable {
+			hostSubNode, error := GetHostSpecifiedNode(root, host)
+			if hostSubNode != nil {
+				return ConvertReturnNode(hostSubNode, host), nil
+			} else {
+				return nil, error
+			}
+		}
+		return ConvertReturnNode(root, host), nil
 	}
 
+	hostSubNode := root
+	if conf.UserSet.DomainBasedSubFolders.Enable {
+		subNode, error := GetHostSpecifiedNode(root, host)
+		if hostSubNode == nil {
+			return nil, error
+		} else {
+			hostSubNode = subNode
+		}
+	}
 	for i := 1; i < len(pArray); i++ {
 		isFound = false
-		for _, item := range root.Children {
+		for _, item := range hostSubNode.Children {
 			if pArray[i] == item.Name {
-				root = item
+				hostSubNode = item
 				isFound = true
 			}
 		}
@@ -77,32 +94,49 @@ func CacheGetPathList(oPath string) (*FileNode, error) {
 	}
 
 	// 只返回当前层的内容
-	reNode := ConvertReturnNode(root)
+	reNode := ConvertReturnNode(hostSubNode, host)
 	return reNode, nil
 }
 
-func ConvertReturnNode(node *FileNode) *FileNode {
+func GetHostSpecifiedNode(root *FileNode, host string) (*FileNode, error) {
+	for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
+		if host == pair.Domain {
+			for _, childNode := range root.Children {
+				if childNode.Path == pair.SubFolder {
+					return childNode, nil
+				}
+			}
+			return nil, errors.New("未找到站点子文件夹:" + pair.SubFolder)
+		}
+	}
+	return nil, errors.New("站点:" + host + "未配置")
+}
+
+func ConvertReturnNode(node *FileNode, host string) *FileNode {
 	if node == nil {
 		return nil
 	}
 
-	reNode := CopyFileNode(node)
+	reNode := CopyFileNode(node, host)
+
+	if reNode == nil {
+		return nil
+	}
 	for key := range node.Children {
 		if node.Children[key].Name == ".password" {
 			continue
 		}
 		tmpNode := node.Children[key]
-		reNode.Children = append(reNode.Children, CopyFileNode(tmpNode))
+		reNode.Children = append(reNode.Children, CopyFileNode(tmpNode, host))
 	}
 	return reNode
 }
 
-func CopyFileNode(node *FileNode) *FileNode {
+func CopyFileNode(node *FileNode, host string) *FileNode {
 	if node == nil {
 		return nil
 	}
-	path := GetReplacePath(node.Path)
-
+	path := GetReplacePath(node.Path, host)
 	return &FileNode{
 		Name:           node.Name,
 		Path:           path,
@@ -115,14 +149,14 @@ func CopyFileNode(node *FileNode) *FileNode {
 	}
 }
 
-func GetDownloadUrl(filePath string) (string, error) {
+func GetDownloadUrl(filePath string, host string) (string, error) {
 	var (
 		fileInfo    *FileNode
 		err         error
 		downloadUrl string
 	)
 
-	if fileInfo, err = CacheGetPathList(filePath); err != nil || fileInfo == nil || fileInfo.IsFolder == true {
+	if fileInfo, err = CacheGetPathList(filePath, host); err != nil || fileInfo == nil || fileInfo.IsFolder == true {
 		log.WithFields(log.Fields{
 			"filePath": filePath,
 			"err":      err,
@@ -139,9 +173,31 @@ func GetDownloadUrl(filePath string) (string, error) {
 // 替换路径
 // 如果设置了 folderSub 为 /public
 // 那么 /public 替换为 /, /public/test 替换为 /test
-func GetReplacePath(pSrc string) string {
-	if conf.UserSet.Server.FolderSub != "/" {
-		pSrc = strings.Replace(pSrc, conf.UserSet.Server.FolderSub, "", 1)
+func GetReplacePath(pSrc string, host string) string {
+	if conf.UserSet.DomainBasedSubFolders.Enable {
+		for i := range conf.UserSet.DomainBasedSubFolders.Pairs {
+			pair := conf.UserSet.DomainBasedSubFolders.Pairs[i]
+			if pair.Domain == host {
+				return ReplaceLeadingPath(pSrc, pair.SubFolder)
+			}
+		}
+		return ReplaceLeadingPath(pSrc, conf.UserSet.DomainBasedSubFolders.DefaultFolder)
+	} else if conf.UserSet.Server.FolderSub != "/" {
+		return ReplaceLeadingPath(pSrc, conf.UserSet.Server.FolderSub)
 	}
 	return pSrc
+}
+
+func ReplaceLeadingPath(source string, target string) string {
+	if strings.Index(source, target) == 0 {
+		str := strings.Replace(source, target, "", 1)
+		if str == "" {
+			return "/"
+		} else {
+			return str
+		}
+	} else {
+		return source
+	}
+
 }

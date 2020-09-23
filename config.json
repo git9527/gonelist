@@ -22,10 +22,10 @@
     "enable": true,
     "pairs": [{
       "domain": "localhost:8000",
-      "sub_folder": "zhangsn"
+      "sub_folder": "/zhangsn"
     }, {
       "domain": "127.0.0.1:8000",
-      "sub_folder": "local"
+      "sub_folder": "/local"
     }],
     "default_folder": "/some folder not exist"
   },
