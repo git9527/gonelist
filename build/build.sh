@@ -28,7 +28,7 @@ case "$1" in
   "docker-local") #使用本地编译二进制文件打包docker和dist
     Dockerfile=Dockerfile.local
     go build -o ${GONELIST_ROOT}/gonelist -ldflags "${LDFLAGS}" ${GONELIST_ROOT}/main.go
-    ;&
+    ;;
   "docker") #使用容器编译和打包dist
     [ -n "$TAG_NUM" ] && build_arg="--build-arg VERSION=$DIST_VERSION"
     docker build -t zhangguanzhang/gonelist:$TAG_NUM $build_arg \
