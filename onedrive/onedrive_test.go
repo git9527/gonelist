@@ -55,7 +55,7 @@ func TestCacheGetPathList(t *testing.T) {
 	FileTree.SetRoot(filetree)
 	FileTree.SetLogin(true)
 
-	root, err := CacheGetPathList("/ttt")
+	root, err := CacheGetPathList("/ttt", "")
 	if err != nil {
 		t.Log(err)
 		return
@@ -84,7 +84,7 @@ func TestConvertReturnNode(t *testing.T) {
 	data, _ = file.ReadFromFile(example + "filetree.json")
 	json.Unmarshal(data, &filetree)
 
-	reNode := ConvertReturnNode(filetree)
+	reNode := ConvertReturnNode(filetree, "")
 	t.Log(reNode)
 }
 
