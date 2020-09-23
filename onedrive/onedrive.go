@@ -98,18 +98,23 @@ func CacheGetPathList(oPath string, origin string) (*FileNode, error) {
 	return reNode, nil
 }
 
-func GetHostSpecifiedNode(root *FileNode, host string) (*FileNode, error) {
+func GetHostSpecifiedNode(root *FileNode, origin string) (*FileNode, error) {
 	for _, pair := range conf.UserSet.DomainBasedSubFolders.Pairs {
-		if host == pair.Domain {
+		if origin == pair.Domain {
+			if pair.SubFolder == "/" {
+				return root, nil
+			}
 			for _, childNode := range root.Children {
 				if childNode.Path == pair.SubFolder {
 					return childNode, nil
 				}
 			}
+			log.Error("can not find sub folder: ", pair.SubFolder)
 			return nil, errors.New("未找到站点子文件夹:" + pair.SubFolder)
 		}
 	}
-	return nil, errors.New("站点:" + host + "未配置")
+	log.Error("can not find site: ", origin)
+	return nil, errors.New("站点:" + origin + "未配置")
 }
 
 func ConvertReturnNode(node *FileNode, host string) *FileNode {

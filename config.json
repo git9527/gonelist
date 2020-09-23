@@ -30,6 +30,11 @@
       "sub_folder": "/local",
       "html_title": "Site hosted in 127.0.0.1",
       "site_header": "Header in 127.0.0.1"
+    }, {
+      "domain": "192.168.0.100:8080",
+      "sub_folder": "/",
+      "html_title": "Site hosted in 192.168.0.100",
+      "site_header": "Header in 192.168.0.100"
     }],
     "default_folder": "/some folder not exist"
   },
