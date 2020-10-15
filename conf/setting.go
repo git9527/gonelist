@@ -174,4 +174,5 @@ type Pair struct {
 	SubFolder  string `json:"sub_folder"`
 	HtmlTitle  string `json:"html_title"`
 	SiteHeader string `json:"site_header"`
+	SiteId     string `json:"site_id"`
 }

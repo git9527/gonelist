@@ -27,10 +27,12 @@ func GetSiteInfo() gin.HandlerFunc {
 				type SiteInfo struct {
 					HtmlTitle  string
 					SiteHeader string
+					SiteId     string
 				}
 				info := SiteInfo{
 					SiteHeader: pair.SiteHeader,
 					HtmlTitle:  pair.HtmlTitle,
+					SiteId:     pair.SiteId,
 				}
 				app.Response(c, http.StatusOK, e.SUCCESS, info)
 				return
